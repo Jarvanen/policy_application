@@ -8,12 +8,6 @@ Source site:
 
 https://xaiip.org.cn/#/government/policyFile?areaRange=%E9%9B%84%E5%AE%89%E6%96%B0%E5%8C%BA
 
-The downloader uses the same public APIs as the website:
-
-- `GET https://api.xaiip.org.cn/policyFile/list`
-- `GET https://api.xaiip.org.cn/admin/policyFile/info`
-- `GET https://api.xaiip.org.cn/files/view?url=...`
-
 ## 1. Download And Convert
 
 Run:
@@ -43,13 +37,9 @@ Conversion rules:
 - DOCX/DOC/XLSX/TXT-like readable attachments are converted into Markdown and
   included as `## 附件`.
 
-PDF conversion defaults to MinerU. The MinerU key is loaded in this order:
-
-1. `--mineru-api-key`
-2. `MINERU_API_KEY`
-3. `--mineru-key-file`, defaulting to `/Users/turing/PycharmProjects/PythonProject/ic/minerutomarkdown.py`
-
-The key is read at runtime and is not copied into this repository.
+PDF conversion defaults to MinerU. Runtime credentials are loaded from the
+local environment or a local config file and are not copied into this
+repository.
 
 ## 2. Generate Declaration Guides
 
@@ -59,14 +49,9 @@ After `policy_md/` exists, generate one declaration guide per policy:
 python3 -u summarize_declaration_guides.py --force --timeout 600 --max-input-chars 60000 --max-output-tokens 4096 --retries 2
 ```
 
-Default LLM settings in code:
-
-- API base: `http://192.168.211.108:8000/v1`
-- API key: `EMPTY`
-- model: `/data3/yangsien/models/Qwen3.6-27B`
-- thinking mode disabled by default through:
-  - `enable_thinking: false`
-  - `chat_template_kwargs.enable_thinking: false`
+Model connection settings are configured in the scripts and can be overridden
+from the command line when needed. Thinking mode is disabled by default unless
+`--enable-thinking` is passed.
 
 Output:
 
@@ -105,7 +90,6 @@ Each JSONL row is one policy rule with fields such as:
 - `deadline`
 - `contacts`
 - `missing_info_needed`
-- `industry_keywords`
 - `region_requirements`
 - `company_stage_requirements`
 - `confidence`
@@ -242,7 +226,7 @@ The QA script does not use vector search or reranking. Retrieval is handled by
 `policy_wiki_search.py` with local filesystem operations:
 
 - read `index.md` and `overview.md`;
-- extract domain keywords and intent keywords from the question;
+- extract domain terms and intent terms from the question;
 - grep `topics/`, `industries/`, and `applicant_types/`;
 - follow wiki links from the best collection pages into `policies/`;
 - grep policy pages directly;
@@ -313,51 +297,3 @@ OCR can be enabled with:
 ```bash
 python3 -u xiongan_policy_pdf_to_md.py --converter local --ocr
 ```
-
-## Cleanup
-
-Safe-to-delete test or preview outputs:
-
-```text
-data/test_mineru_dry_run/
-data/test_policy_combined/
-data/test_xiongan_policy_files/
-data/xiongan_policy_files/policy_rules_preview.jsonl
-data/xiongan_policy_files/company_xiongan_huaqing_match_preview.md
-data/xiongan_policy_files/company_xiongan_huaqing_match_preview.jsonl
-data/xiongan_policy_files/company_xiongan_huaqing_prefilter_preview.jsonl
-data/xiongan_policy_files/company_xiongan_huaqing_profile_preview.json
-data/xiongan_policy_files/company_xiongan_huaqing_match_report_prefilter_test.md
-data/xiongan_policy_files/company_xiongan_huaqing_match_results_prefilter_test.jsonl
-data/xiongan_policy_files/company_xiongan_huaqing_prefilter_test.jsonl
-data/xiongan_policy_files/company_xiongan_huaqing_profile_test.json
-data/xiongan_policy_files/summaries/
-__pycache__/
-.site-cache/
-data/.DS_Store
-data/xiongan_policy_files/.DS_Store
-```
-
-Keep these for the formal workflow:
-
-```text
-data/xiongan_policy_files/pdfs/
-data/xiongan_policy_files/files/
-data/xiongan_policy_files/policy_md/
-data/xiongan_policy_files/declaration_guides/
-data/xiongan_policy_files/manifest.jsonl
-data/xiongan_policy_files/manifest.json
-data/xiongan_policy_files/manifest.csv
-data/xiongan_policy_files/policy_rules.jsonl
-data/xiongan_policy_files/llm_wiki/
-data/xiongan_policy_files/company_xiongan_huaqing.txt
-data/xiongan_policy_files/company_xiongan_huaqing_match_report.md
-data/xiongan_policy_files/company_xiongan_huaqing_match_results.jsonl
-data/xiongan_policy_files/company_xiongan_huaqing_prefilter.jsonl
-data/xiongan_policy_files/company_xiongan_huaqing_profile.json
-```
-
-`data/xiongan_policy_files/md/` is the older per-attachment Markdown cache.
-It can be useful for reusing PDF parse results and avoiding repeated MinerU
-calls, so keep it unless you are sure you will not rerun conversion and do not
-need cached image assets.
