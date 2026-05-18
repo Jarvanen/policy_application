@@ -1,0 +1,14 @@
+.DS_Store
+.env
+.env.*
+.idea/
+.pytest_cache/
+.ruff_cache/
+.site-cache/
+.venv/
+__pycache__/
+*.part
+*.pyc
+*.pyo
+*.log
+data/
