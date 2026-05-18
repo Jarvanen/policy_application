@@ -11,4 +11,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.log
-data/
+data/*
+!data/xiongan_policy_files/
+data/xiongan_policy_files/files/
+data/xiongan_policy_files/md/
+data/xiongan_policy_files/pdfs/
